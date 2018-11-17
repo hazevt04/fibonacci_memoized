@@ -1,15 +1,39 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <time.h>
 
 #define NUM_ITERATIONS 5
+#define TABLE_SIZE ( 1 << 3 )
+
 
 typedef struct lookup_item_s {
    unsigned long num;
    unsigned long result;
 } lookup_item_t;
+
+
+// binary search
+bool bsearch_table( lookup_item_t* table, unsigned long key ) {
+   return false;
+}
+
+// linear search
+bool lsearch_table( lookup_item_t* table, unsigned long key, unsigned long* result ) {
+   if ( !table )
+      fprintf( stderr, "ERROR: lookup table pointer NULL\n" );
+
+   for ( unsigned int index = 0; index < TABLE_SIZE; index++ ) {
+      if ( key == table[ index ].num ) {
+         *result = table[ index ].result; 
+         return true;
+      }
+   }
+   return false;
+}
+
 
 unsigned long fibonacci_recursive( unsigned long num ) {
    if ( num < 2 ) {
@@ -18,6 +42,25 @@ unsigned long fibonacci_recursive( unsigned long num ) {
       return fibonacci_recursive( num - 1 ) + fibonacci_recursive( num - 2 );
    }
 }
+
+
+unsigned long fibonacci_memoized( lookup_item_t* table, unsigned long num ) {
+   unsigned long result;
+   if ( num  < 2 ) {
+      return 1;
+   } else {
+      if ( lsearch_table( table, num, &result ) ) {
+         return result;
+      } else {
+         result = fibonacci_memoized( table, ( num - 1 ) ) +
+            fibonacci_memoized( table, ( num - 2 ) );
+         table[ num ].num = num;
+         table[ num ].result = result;
+         return result;
+      } // end of else !lsearch
+   } // end of else num >= 2
+}
+
 
 void usage( char* argv ) {
    printf( "Usage: %s <options>\n", argv );
@@ -58,9 +101,9 @@ int main( int argc, char** argv ) {
 
       table[ iteration ].num = iteration;
       table[ iteration ].result = result;
-      printf( "Fibonacci( %lu ) is %lu\n", table[ iteration ].num, table[ iteration ].result );
    
    }
+   printf( "Fibonacci_recursive( %lu ) is %lu\n", num, result );
    end_time = clock();
    cpu_time_duration = ( double )( end_time - start_time ) / ( double )CLOCKS_PER_SEC;
    printf( "Calculation of %ld iterations took %10.9f seconds.\n", num, cpu_time_duration );
@@ -68,17 +111,12 @@ int main( int argc, char** argv ) {
    // Memoized  version
    start_time = clock();
    for( unsigned long iteration = 0; iteration < num; iteration++ ) {
-  
-      //result = fibonacci_recursive( iteration );
-
-      table[ iteration ].num = iteration;
-      table[ iteration ].result = result;
-      printf( "Fibonacci( %lu ) is %lu\n", table[ iteration ].num, table[ iteration ].result );
-   
+      //unsigned long fibonacci_memoized( lookup_item_t* table, unsigned long num ) {
+      result = fibonacci_memoized( table, iteration );
    }
+   printf( "Fibonacci_memoized( %lu ) is %lu\n", num, result );
    end_time = clock();
    cpu_time_duration = ( double )( end_time - start_time ) / ( double )CLOCKS_PER_SEC;
    printf( "Calculation of %ld iterations took %10.9f seconds.\n", num, cpu_time_duration );
 
-   return 0;
 }
