@@ -8,33 +8,6 @@
 #define NUM_ITERATIONS 5
 #define TABLE_SIZE ( 1 << 3 )
 
-
-typedef struct lookup_item_s {
-   unsigned long num;
-   unsigned long result;
-} lookup_item_t;
-
-
-// binary search
-bool bsearch_table( lookup_item_t* table, unsigned long key ) {
-   return false;
-}
-
-// linear search
-bool lsearch_table( lookup_item_t* table, unsigned long key, unsigned long* result ) {
-   if ( !table )
-      fprintf( stderr, "ERROR: lookup table pointer NULL\n" );
-
-   for ( unsigned int index = 0; index < TABLE_SIZE; index++ ) {
-      if ( key == table[ index ].num ) {
-         *result = table[ index ].result; 
-         return true;
-      }
-   }
-   return false;
-}
-
-
 unsigned long fibonacci_recursive( unsigned long num ) {
    if ( num < 2 ) {
       return 1;
@@ -43,19 +16,17 @@ unsigned long fibonacci_recursive( unsigned long num ) {
    }
 }
 
-
-unsigned long fibonacci_memoized( lookup_item_t* table, unsigned long num ) {
+unsigned long fibonacci_memoized( unsigned long* table, unsigned long num ) {
    unsigned long result;
    if ( num  < 2 ) {
       return 1;
    } else {
-      if ( lsearch_table( table, num, &result ) ) {
-         return result;
+      if ( 0 != table[ num ] ) {
+         return table[ num ];
       } else {
          result = fibonacci_memoized( table, ( num - 1 ) ) +
             fibonacci_memoized( table, ( num - 2 ) );
-         table[ num ].num = num;
-         table[ num ].result = result;
+         table[ num ] = result;
          return result;
       } // end of else !lsearch
    } // end of else num >= 2
@@ -86,11 +57,11 @@ int main( int argc, char** argv ) {
       return 1;
    }
    
-   lookup_item_t* table = NULL;
-   table = ( lookup_item_t* )malloc( sizeof( lookup_item_t ) * num );
+   unsigned long* table = NULL;
+   table = ( unsigned long* )calloc( num, sizeof( unsigned long ) );
    if ( !table ) {
-      printf( "ERROR: Malloc failed for table with %ld items.\n", num );
-      return 1;
+      printf( "ERROR: Calloc failed for table with %ld items.\n", num );
+      return -1;
    }
 
    // Recursive version
@@ -98,9 +69,7 @@ int main( int argc, char** argv ) {
    for( unsigned long iteration = 0; iteration < num; iteration++ ) {
   
       result = fibonacci_recursive( iteration );
-
-      table[ iteration ].num = iteration;
-      table[ iteration ].result = result;
+      table[ iteration ] = result;
    
    }
    printf( "Fibonacci_recursive( %lu ) is %lu\n", num, result );
