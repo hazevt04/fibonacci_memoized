@@ -47,10 +47,6 @@ int main( int argc, char** argv ) {
    unsigned long num = 0;
    unsigned long result = 0;
    char* endptr = NULL;
-   clock_t start_time = 0;
-   clock_t end_time = 0;
-   double cpu_time_duration = 0;
-   double total_duration = 0;
 
    if ( argc == 2 ) {
       num = strtol( argv[1], &endptr, 10 );
@@ -80,14 +76,14 @@ int main( int argc, char** argv ) {
    printf( "Fibonacci_recursive( %lu ) is %lu\n", num, result );
    printf( "Calculation of %ld iterations took %10.9f milliseconds.\n", num, duration.count() );
 
-   // Memoized  version
+   // Memoized version
    start_point = Steady_Clock::now();
    for( unsigned long iteration = 0; iteration < num; iteration++ ) {
-      //unsigned long fibonacci_memoized( lookup_item_t* table, unsigned long num ) {
       result = fibonacci_memoized( table, iteration );
    }
    duration = Steady_Clock::now() - start_point;
    printf( "Fibonacci_memoized( %lu ) is %lu\n", num, result );
    printf( "Calculation of %ld iterations took %10.9f milliseconds.\n", num, duration.count() );
-
+   
+   return 0;
 }
